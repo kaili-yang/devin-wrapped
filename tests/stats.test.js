@@ -82,3 +82,18 @@ test('periods', () => {
   assert.throws(() => resolvePeriod({ days: '0' }), /days/);
   assert.throws(() => resolvePeriod({ year: 'abc' }), /year/);
 });
+
+test('message time comes from metadata.created_at, not the (rewritable) row timestamp', (t) => {
+  const store = buildStore();
+  t.after(store.cleanup);
+  const { DatabaseSync } = require('node:sqlite');
+  const db = new DatabaseSync(store.file);
+  const rowTs = Date.UTC(2025, 0, 1) / 1000; // row says 2025 ...
+  db.prepare('INSERT INTO message_nodes (session_id, node_id, chat_message, created_at) VALUES (?, ?, ?, ?)')
+    .run('s1', 999, JSON.stringify({ message_id: 'late', role: 'user', content: 'hello', metadata: { is_user_input: true, created_at: '2026-07-04T10:00:00.5Z' } }), rowTs);
+  db.close();
+  const raw = readStore(store.file, YEAR_2026);
+  const m = raw.messages.find((x) => x.chars === 5);
+  assert.equal(m.ts, Date.parse('2026-07-04T10:00:00.5Z')); // ... the message says 2026
+  assert.equal(readStore(store.file, { from: Date.UTC(2025, 0, 1), to: Date.UTC(2026, 0, 1) }).messages.some((x) => x.chars === 5), false);
+});
