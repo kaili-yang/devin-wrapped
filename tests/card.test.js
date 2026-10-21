@@ -11,7 +11,7 @@ const { computeStats } = require('../lib/stats');
 const { pickPersona } = require('../lib/persona');
 const { renderSvg, renderHtml, esc } = require('../lib/card');
 const { renderTerminal, sparkline } = require('../lib/terminal');
-const { STRINGS } = require('../lib/i18n');
+const { T } = require('../lib/text');
 
 const CLI = path.join(__dirname, '..', 'bin', 'cli.js');
 
@@ -29,11 +29,11 @@ function wellFormed(svg) {
   assert.deepEqual(stack, []);
 }
 
-test('every persona has a name and tagline in both languages', () => {
-  for (const lang of ['zh', 'en']) {
+test('every persona has a name and tagline', () => {
+  {
     for (const id of ['night-owl', 'early-bird', 'weekend-warrior', 'delegator', 'spec-writer', 'refactor-maniac', 'terminal-ninja', 'researcher', 'multitasker', 'steady-builder', 'newcomer']) {
-      const p = STRINGS[lang].personas[id];
-      assert.ok(p && p[0] && p[1], `${lang}/${id}`);
+      const p = T.personas[id];
+      assert.ok(p && p[0] && p[1], id);
     }
   }
 });
@@ -42,14 +42,14 @@ test('the SVG card is well-formed and has no placeholder values', (t) => {
   const store = buildStore();
   t.after(store.cleanup);
   const s = stats(store);
-  for (const lang of ['zh', 'en']) {
+  {
     const persona = pickPersona(s);
-    const svg = renderSvg(s, persona, lang);
+    const svg = renderSvg(s, persona);
     wellFormed(svg);
     assert.doesNotMatch(svg, /NaN|undefined|null|Infinity/);
     assert.match(svg, /width="1080" height="1920"/);
-    assert.ok(svg.includes(esc(STRINGS[lang].personas[persona.id][0])));
-    assert.match(renderHtml(svg, lang), /<svg[\s\S]*<\/svg>[\s\S]*toBlob/);
+    assert.ok(svg.includes(esc(T.personas[persona.id][0])));
+    assert.match(renderHtml(svg), /<svg[\s\S]*<\/svg>[\s\S]*toBlob/);
   }
 });
 
@@ -59,10 +59,10 @@ test('an empty period still renders', (t) => {
   const period = { from: Date.UTC(2030, 0, 1), to: Date.UTC(2031, 0, 1), label: '2030' };
   const s = computeStats(readStore(store.file, period), period);
   assert.equal(s.sessions, 0);
-  const svg = renderSvg(s, pickPersona(s), 'en');
+  const svg = renderSvg(s, pickPersona(s));
   wellFormed(svg);
   assert.doesNotMatch(svg, /NaN|undefined|Infinity/);
-  assert.match(renderTerminal(s, pickPersona(s), 'en'), /New Friend/);
+  assert.match(renderTerminal(s, pickPersona(s)), /New Friend/);
 });
 
 test('user text is escaped in the SVG', (t) => {
@@ -71,7 +71,7 @@ test('user text is escaped in the SVG', (t) => {
   const s = stats(store);
   s.models = [{ name: 'x', count: 1, label: '<script>&' }];
   s.topLanguages = [];
-  const svg = renderSvg(s, pickPersona(s), 'en');
+  const svg = renderSvg(s, pickPersona(s));
   assert.ok(!svg.includes('<script>'));
   assert.ok(svg.includes('&lt;script&gt;&amp;'));
 });
@@ -79,10 +79,10 @@ test('user text is escaped in the SVG', (t) => {
 test('terminal summary', (t) => {
   const store = buildStore();
   t.after(store.cleanup);
-  const out = renderTerminal(stats(store), { id: 'researcher', tags: ['night-owl'] }, 'zh');
-  assert.match(out, /3 个会话/);
-  assert.match(out, /研究员/);
-  assert.match(out, /夜猫子/);
+  const out = renderTerminal(stats(store), { id: 'researcher', tags: ['night-owl'] });
+  assert.match(out, /3 sessions/);
+  assert.match(out, /The Researcher/);
+  assert.match(out, /Also: Night Owl/);
   assert.equal(sparkline([0, 1, 8]), ' ▁█');
 });
 
@@ -96,7 +96,7 @@ test('CLI writes svg + html and prints JSON', (t) => {
   assert.equal(parsed.sessions, 3);
   assert.ok(parsed.persona.id);
   const out = path.join(store.dir, 'out');
-  const r = spawnSync(process.execPath, [CLI, '--db', store.file, '--year', '2026', '--lang', 'en', '--out', out, '--no-png', '--no-open'], { encoding: 'utf8', env });
+  const r = spawnSync(process.execPath, [CLI, '--db', store.file, '--year', '2026', '--out', out, '--no-png', '--no-open'], { encoding: 'utf8', env });
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /3 sessions/);
   assert.ok(fs.existsSync(path.join(out, 'devin-wrapped-2026.svg')));

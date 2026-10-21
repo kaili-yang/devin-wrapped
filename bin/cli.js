@@ -8,7 +8,6 @@ const { parseArgs } = require('node:util');
 const { defaultDbPath, readStore } = require('../lib/db');
 const { computeStats } = require('../lib/stats');
 const { pickPersona } = require('../lib/persona');
-const { defaultLang } = require('../lib/i18n');
 const { resolvePeriod } = require('../lib/period');
 const { renderSvg, renderHtml } = require('../lib/card');
 const { renderTerminal } = require('../lib/terminal');
@@ -20,7 +19,6 @@ Usage: npx devin-wrapped [options]
   --year <yyyy>     calendar year (default: this year)
   --days <n>        the last n days instead
   --all             everything in the store
-  --lang zh|en      card language (default: from your system locale)
   --out <dir>       where to write the card (default: ./devin-wrapped-<period>)
   --db <path>       Devin session store (default: ${defaultDbPath()})
   --json            print the raw stats as JSON and exit
@@ -62,27 +60,26 @@ function slug(label) {
 function main() {
   const { values } = parseArgs({
     options: {
-      year: { type: 'string' }, days: { type: 'string' }, all: { type: 'boolean' }, lang: { type: 'string' },
+      year: { type: 'string' }, days: { type: 'string' }, all: { type: 'boolean' },
       out: { type: 'string' }, db: { type: 'string' }, json: { type: 'boolean' },
       'no-png': { type: 'boolean' }, 'no-open': { type: 'boolean' }, help: { type: 'boolean', short: 'h' },
     },
   });
   if (values.help) return console.log(HELP);
-  const lang = values.lang === 'zh' || values.lang === 'en' ? values.lang : defaultLang();
-  const period = resolvePeriod(values, lang);
+  const period = resolvePeriod(values);
   const raw = readStore(values.db || defaultDbPath(), period);
   const stats = computeStats(raw, period);
   const persona = pickPersona(stats);
   if (values.json) return console.log(JSON.stringify({ ...stats, persona }, null, 2));
 
-  console.log(renderTerminal(stats, persona, lang, process.stdout.isTTY));
+  console.log(renderTerminal(stats, persona, process.stdout.isTTY));
   const base = `devin-wrapped-${slug(values.all ? 'all' : values.days ? `${values.days}d` : period.label)}`;
   const outDir = path.resolve(values.out || base);
   fs.mkdirSync(outDir, { recursive: true });
-  const svg = renderSvg(stats, persona, lang);
+  const svg = renderSvg(stats, persona);
   const files = { svg: path.join(outDir, `${base}.svg`), html: path.join(outDir, `${base}.html`), png: path.join(outDir, `${base}.png`) };
   fs.writeFileSync(files.svg, svg);
-  fs.writeFileSync(files.html, renderHtml(svg, lang, base));
+  fs.writeFileSync(files.html, renderHtml(svg, base));
   const png = !values['no-png'] && renderPng(files.html, files.png);
   console.log(`  ${png ? files.png : files.html}`);
   if (!png && !values['no-png']) console.log('  (no Chrome/Edge found for the PNG: open the HTML and click "Save as PNG")');

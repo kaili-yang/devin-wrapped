@@ -1,17 +1,14 @@
 # devin-wrapped
 
-**你和 Devin 的这一年，一张图说清楚。** Spotify Wrapped 风格的 Devin 年度报告：会话数、连续活跃天数、
-改了多少行代码、Devin 最爱用的工具、最晚熬到几点，还有你的 **Devin 人格**。
-
-Your year with Devin, Spotify Wrapped style — as a 1080×1920 card made for sharing.
+**Your year with Devin, in one card.** A Spotify Wrapped style year in review: sessions, streaks, lines changed,
+Devin's favorite tools, your latest night, and your **Devin persona**, as a 1080×1920 card made for sharing.
 
 ```bash
 npx github:kaili-yang/devin-wrapped
 ```
 
 <p align="center">
-  <img src="docs/sample-zh.png" width="320" alt="Devin Wrapped card (Chinese)">
-  <img src="docs/sample-en.png" width="320" alt="Devin Wrapped card (English)">
+  <img src="docs/sample-en.png" width="360" alt="Devin Wrapped card">
 </p>
 
 Reads the local session store that Devin CLI and Devin Desktop share (`~/.local/share/devin/cli/sessions.db`),
@@ -22,7 +19,7 @@ read-only. **Nothing is uploaded**, and the card shows no project names, paths o
 ```bash
 npx github:kaili-yang/devin-wrapped               # this year
 npx github:kaili-yang/devin-wrapped --days 30     # last 30 days
-npx github:kaili-yang/devin-wrapped --all --lang en
+npx github:kaili-yang/devin-wrapped --all         # everything
 ```
 
 | Option | |
@@ -30,7 +27,6 @@ npx github:kaili-yang/devin-wrapped --all --lang en
 | `--year <yyyy>` | calendar year (default: this year) |
 | `--days <n>` | the last *n* days instead |
 | `--all` | everything in the store |
-| `--lang zh\|en` | card language (default: your system locale) |
 | `--out <dir>` | output folder (default: `./devin-wrapped-<period>`) |
 | `--db <path>` | another session store (or `DEVIN_SESSIONS_DB`) |
 | `--json` | raw stats as JSON |
@@ -44,13 +40,13 @@ The terminal also gets a summary with the private bits (top projects, longest se
 ```
   DEVIN WRAPPED  2026
 
-  20 个会话   10 天活跃   1,755 次 Devin 动手
-  +32.0K / -328 行代码改动, 313 个文件
+  20 sessions   12 active days   1,927 things Devin did
+  +36.4K / -395 lines changed, 360 files
 
-  你的 Devin 人格: 重构狂魔 — 代码不改到满意，绝不收工。
-  同时也是: 多线程大师, 夜猫子
+  Your Devin persona: Refactor Maniac — Not done until the diff is huge and the code is clean.
+  Also: The Multitasker
 
-  一天中的活跃时段  0h         ▂ ▁▁▁▁▁▁▁▃▂▁▁▁█▂ 23h
+  When you work  0h ▆▁     ▄▁▁▅▄▅▁▃▂▃█▇▃▄▆▅█ 23h
   ...
 ```
 
@@ -58,18 +54,18 @@ The terminal also gets a summary with the private bits (top projects, longest se
 
 The persona whose signal beats its threshold by the widest margin wins; up to two runners-up appear as tags.
 
-| Persona | 人格 | Signal |
-|---|---|---|
-| Night Owl | 夜猫子 | ≥ 25% of activity between 22:00 and 05:00 |
-| Early Bird | 早起鸟 | ≥ 20% between 05:00 and 09:00 |
-| Weekend Warrior | 周末战士 | ≥ 35% on weekends |
-| The Delegator | 甩手掌柜 | ≥ 15 Devin actions per prompt |
-| The Spec Writer | 产品经理 | prompts average ≥ 300 characters |
-| Refactor Maniac | 重构狂魔 | ≥ 5,000 lines changed |
-| Terminal Ninja | 命令行侠客 | ≥ 45% of actions are shell commands |
-| The Researcher | 研究员 | ≥ 10% of actions are web searches / fetches |
-| The Multitasker | 多线程大师 | ≥ 4 sessions in one day |
-| Steady Builder | 稳健型工程师 | none of the above |
+| Persona | Signal |
+|---|---|
+| Night Owl | ≥ 25% of activity between 22:00 and 05:00 |
+| Early Bird | ≥ 20% between 05:00 and 09:00 |
+| Weekend Warrior | ≥ 35% on weekends |
+| The Delegator | ≥ 15 Devin actions per prompt |
+| The Spec Writer | prompts average ≥ 300 characters |
+| Refactor Maniac | ≥ 5,000 lines changed |
+| Terminal Ninja | ≥ 45% of actions are shell commands |
+| The Researcher | ≥ 10% of actions are web searches / fetches |
+| The Multitasker | ≥ 4 sessions in one day |
+| Steady Builder | none of the above |
 
 ## What is counted
 

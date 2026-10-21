@@ -75,10 +75,10 @@ test('personas', () => {
 
 test('periods', () => {
   const now = Date.UTC(2026, 9, 21, 12);
-  assert.deepEqual(resolvePeriod({}, 'en', now), { from: Date.UTC(2026, 0, 1), to: Date.UTC(2027, 0, 1), label: '2026' });
-  assert.equal(resolvePeriod({ days: '30' }, 'zh', now).label, '最近 30 天');
-  assert.equal(resolvePeriod({ days: '30' }, 'en', now).from, now - 30 * 86_400_000);
-  assert.equal(resolvePeriod({ all: true }, 'en', now).from, 0);
+  assert.deepEqual(resolvePeriod({}, now), { from: Date.UTC(2026, 0, 1), to: Date.UTC(2027, 0, 1), label: '2026' });
+  assert.equal(resolvePeriod({ days: '30' }, now).label, 'Last 30 days');
+  assert.equal(resolvePeriod({ days: '30' }, now).from, now - 30 * 86_400_000);
+  assert.equal(resolvePeriod({ all: true }, now).from, 0);
   assert.throws(() => resolvePeriod({ days: '0' }), /days/);
   assert.throws(() => resolvePeriod({ year: 'abc' }), /year/);
 });
